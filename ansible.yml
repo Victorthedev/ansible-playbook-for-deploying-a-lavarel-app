@@ -1,0 +1,28 @@
+---
+- name: Deploy Laravel RealWorld example app
+  hosts: ubuntu:rhel
+  become: true
+  vars:
+    app_name: "realworld-app"
+    app_repo: "https://github.com/f1amy/laravel-realworld-example-app.git"
+    app_path: "/var/www/{{ app_name }}"
+    composer_path: "/usr/local/bin/composer"
+  tasks:
+    - name: Clone the app repository
+      git:
+        repo: "{{ app_repo }}"
+        dest: "{{ app_path }}"
+        version: main
+      become: true
+
+    - name: Install dependencies
+      command: "{{ composer_path }} install"
+      args:
+        chdir: "{{ app_path }}"
+      become: true
+
+    - name: Set up environment variables
+      template:
+        src: "env_vars.j2"
+        dest: "{{ app_path }}/.env"
+      become: true
